@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="250.0" maxWidth="500.0" minHeight="250" minWidth="500" prefHeight="250.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="zapoctak.MainOverviewController">
+   <children>
+      <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="510.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem onAction="#menuClose" text="Close" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <TextField fx:id="textField" layoutX="60.0" layoutY="45.0" prefHeight="25.0" prefWidth="370.0"></TextField>
+      <Button fx:id="fetchButton" layoutX="445.0" layoutY="45.0" mnemonicParsing="false" onAction="#initFetch" text="Fetch" />
+      <Label layoutX="20.0" layoutY="49.0" text="Blog:" />
+      <Separator layoutY="230.0" prefWidth="510.0" />
+      <Label fx:id="footerLabel" layoutX="5.0" layoutY="238.0" text="No job running" />
+   </children>
+</AnchorPane>
