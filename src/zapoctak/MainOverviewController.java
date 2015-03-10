@@ -5,10 +5,8 @@
  */
 package zapoctak;
 
-import java.io.FileOutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -21,6 +19,8 @@ import javafx.stage.Stage;
 import org.controlsfx.dialog.Dialogs;
 
 public class MainOverviewController implements Initializable {
+
+    private TumblrFetchingService fetchingService;
 
     @FXML
     public MenuBar menuBar;
@@ -36,34 +36,46 @@ public class MainOverviewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+    }
 
+    public static void MessageBox(Stage stage, String msg) {
+        Dialogs.create()
+                .owner(stage)
+                .title("Message")
+                .masthead(null)
+                .message(msg)
+                .showInformation();
     }
 
     @FXML
     public void initFetch(ActionEvent e) {
-        if (this.textField.getText().length() == 0) {
-            Dialogs.create()
-                    .owner((Stage) menuBar.getScene().getWindow())
-                    .title("Error")
-                    .masthead(null)
-                    .message("Please enter a valid blog ID.")
-                    .showInformation();
+        Stage s = (Stage) menuBar.getScene().getWindow();
+
+        if (textField.getText().length() == 0) {
+            MessageBox(s, "Please enter a valid blog ID.");
 
             return;
         }
 
-        this.textField.setDisable(true);
-        this.fetchButton.setDisable(true);
-
         try {
-            URL website = new URL("http://36.media.tumblr.com/d4b9d1508973efd0b1cfb49c4363333b/tumblr_n0dv3vlZYh1smzycho1_500.jpg");
-            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-            
-            FileOutputStream fos = new FileOutputStream("image.jpg");
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            URL test = new URL("http://" + textField.getText() + ".tumblr.com/");
+
+            HttpURLConnection conn = (HttpURLConnection) test.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+
+            if (conn.getResponseCode() != 200) {
+                MessageBox(s, "Blog ID is invalid or blog no longer exists.");
+                return;
+            }
+
+            textField.setDisable(true);
+            fetchButton.setDisable(true);
+
+            fetchingService = new TumblrFetchingService(textField.getText());
+            fetchingService.execute();
         } catch (Exception ex) {
-                
+            MessageBox(s, "Error occured while fetching the URL."); // bad luck huh
         }
     }
 

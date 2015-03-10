@@ -2,7 +2,6 @@ package zapoctak;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -15,9 +14,9 @@ public class TumblrFetchingService {
     private List<Runnable> consumers;
 
     public TumblrFetchingService(String blog) {
-        this.sharedQueue = new ArrayBlockingQueue<>(10);
-        this.producers = new ArrayList<>();
-        this.consumers = new ArrayList<>();
+        sharedQueue = new ArrayBlockingQueue<>(10);
+        producers = new ArrayList<>();
+        consumers = new ArrayList<>();
 
         int threadCount = Runtime.getRuntime().availableProcessors(); // TODO
     }
