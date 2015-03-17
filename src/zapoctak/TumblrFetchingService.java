@@ -13,7 +13,9 @@ public class TumblrFetchingService {
 
     private List<Runnable> consumers;
 
-    public TumblrFetchingService(String blog) {
+    public TumblrFetchingService(String blog) throws InvalidArgumentException {
+        Job.setUrl(blog);
+        
         sharedQueue = new ArrayBlockingQueue<>(10);
         producers = new ArrayList<>();
         consumers = new ArrayList<>();

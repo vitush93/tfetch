@@ -4,16 +4,14 @@ import java.util.concurrent.BlockingQueue;
 
 public class Crawler implements Runnable {
     
-    private BlockingQueue<String> queue;
+    private BlockingQueue<Job> queue;
     
-    public Crawler(String blog, BlockingQueue<String> q) {
+    public Crawler(String blog, BlockingQueue<Job> q) {
         queue = q;
     }
     
     @Override
     public void run() {
-        for(int i = 0; i < 100; i++) {
-            queue.add(new String());
-        }
+        
     }
 }

@@ -74,6 +74,8 @@ public class MainOverviewController implements Initializable {
 
             fetchingService = new TumblrFetchingService(textField.getText());
             fetchingService.execute();
+        } catch (InvalidArgumentException ex) {
+            MessageBox(s, ex.getMessage());
         } catch (Exception ex) {
             MessageBox(s, "Error occured while fetching the URL."); // bad luck huh
         }
