@@ -1,4 +1,4 @@
-package zapoctak;
+package zapoctak.model;
 
 import java.io.FileOutputStream;
 import java.net.URL;
@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class Parser implements Runnable {
 
-    private BlockingQueue<Job> queue;
+    private final BlockingQueue<Job> queue;
 
     public Parser(BlockingQueue<Job> q) {
         queue = q;

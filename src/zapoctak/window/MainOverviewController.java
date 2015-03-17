@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package zapoctak;
+package zapoctak.window;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -17,6 +17,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.controlsfx.dialog.Dialogs;
+import zapoctak.misc.InvalidArgumentException;
+import zapoctak.model.TumblrFetchingService;
 
 public class MainOverviewController implements Initializable {
 

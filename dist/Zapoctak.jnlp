@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="Zapoctak.jar" size="8041" download="eager" />
+    <jar href="Zapoctak.jar" size="8596" download="eager" />
     <jar href="lib/controlsfx-8.20.8.jar" size="957666" download="eager" />
     <jar href="lib/openjfx-dialogs-1.0.2.jar" size="148557" download="eager" />
   </resources>

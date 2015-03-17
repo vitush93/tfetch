@@ -1,0 +1,8 @@
+package zapoctak.misc;
+
+public class InvalidArgumentException extends Exception {
+
+    public InvalidArgumentException(String message) {
+        super(message);
+    }
+}

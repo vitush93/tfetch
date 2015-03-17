@@ -1,23 +1,22 @@
-package zapoctak;
+package zapoctak.model;
 
+import zapoctak.misc.InvalidOperationException;
+import zapoctak.misc.InvalidArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Job {
-    
-    private static final int PAGES_PER_JOB = 5;
-    private static String URL;
 
     /**
-     * Job starting page.
+     * Working URL.
      */
-    private int startPage;
-    
+    private static String URL;
+
     /**
      * List of collected links.
      */
     private List<String> images;
-    
+
     /**
      * Flag to indicate whether the job has been completed.
      */
@@ -25,21 +24,20 @@ public class Job {
 
     /**
      * @param page Job starting page
-     * @throws InvalidArgumentException 
+     * @throws InvalidArgumentException
      */
-    public Job(int page) throws InvalidArgumentException {
+    public Job() throws InvalidArgumentException {
         if (URL.length() == 0) {
             throw new InvalidArgumentException("Working URL is not set.");
         }
-
-        startPage = page;
+        
         images = new ArrayList<>();
     }
 
     /**
-     * 
-     * @param s Blog url
-     * @throws InvalidArgumentException 
+     *
+     * @param s Blog URL
+     * @throws InvalidArgumentException
      */
     public static void setUrl(String s) throws InvalidArgumentException {
         if (s.length() == 0) {
@@ -51,23 +49,15 @@ public class Job {
 
     /**
      * Adds a new image to the job.
-     * 
+     *
      * @param img Image URL
      */
     public void addImage(String img) {
         images.add(img);
     }
-    
-    /**
-     * 
-     * @return Crawler's starting page
-     */
-    public int getStartPage() {
-        return startPage;
-    }
 
     /**
-     * 
+     *
      * @return Complete list of images
      * @throws InvalidOperationException
      */
@@ -77,19 +67,5 @@ public class Job {
         }
 
         return images;
-    }
-}
-
-class InvalidArgumentException extends Exception {
-
-    public InvalidArgumentException(String message) {
-        super(message);
-    }
-}
-
-class InvalidOperationException extends Exception {
-
-    public InvalidOperationException(String message) {
-        super(message);
     }
 }
