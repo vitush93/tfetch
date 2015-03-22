@@ -20,6 +20,10 @@ public class Zapoctak extends Application {
         stage.setResizable(false);
         stage.show();
     }
+    
+    @Override
+    public void stop() {
+    }
 
     /**
      * @param args the command line arguments
@@ -28,4 +32,18 @@ public class Zapoctak extends Application {
         launch(args);
     }
     
+}
+
+class InvalidArgumentException extends Exception {
+
+    public InvalidArgumentException(String message) {
+        super(message);
+    }
+}
+
+class InvalidOperationException extends Exception {
+
+    public InvalidOperationException(String message) {
+        super(message);
+    }
 }

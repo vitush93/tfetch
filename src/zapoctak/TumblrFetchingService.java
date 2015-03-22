@@ -1,46 +1,86 @@
 package zapoctak;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Core fetching functionality.
+ *
+ * @author Vít Habada
+ */
 public class TumblrFetchingService {
 
+    public static final int QUEUE_SIZE = 20;
+
+    /**
+     * Shared queue for the consumer-producer pattern.
+     */
     private final BlockingQueue<Job> sharedQueue;
 
-    private final List<Runnable> producers;
+    /**
+     * List of producers.
+     */
+    private final List<Thread> producers;
 
-    private final List<Runnable> consumers;
+    /**
+     * List of consumers.
+     */
+    private final List<Thread> consumers;
 
+    /**
+     *
+     * @param blog
+     * @throws InvalidArgumentException
+     */
     public TumblrFetchingService(String blog) throws InvalidArgumentException {
         Job.setUrl(blog);
 
-        sharedQueue = new ArrayBlockingQueue<>(10);
+        sharedQueue = new ArrayBlockingQueue<>(QUEUE_SIZE);
         producers = new ArrayList<>();
         consumers = new ArrayList<>();
-
-        for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
-            producers.add(new Crawler(blog, sharedQueue));
-        }
     }
 
-    public void execute() {
-        try {
-            URL website = new URL("http://cutegirls33.tumblr.com/");
-            URLConnection conn = website.openConnection();
-            BufferedReader bfr = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    /**
+     * Stop the fetching process and all workers.
+     */
+    public void stop() {
+        Crawler.cancelRequested = true;
+        // TODO: join all threads
+    }
 
-            String s;
-            while((s = bfr.readLine()) != null) System.out.println(s);
-        } catch (Exception e) {
-            e.printStackTrace();
+    /**
+     * Start the fetching process.
+     */
+    public void start() {
+        int threadCount = Runtime.getRuntime().availableProcessors();
+
+        // init producers - split by equivalence classes
+        producers.add(new Thread(new Crawler(sharedQueue, threadCount, threadCount)));
+        for (int i = 1; i < threadCount; i++) {
+            producers.add(new Thread(new Crawler(sharedQueue, i % threadCount, threadCount)));
         }
+
+        // init consumers
+        for (int i = 0; i < threadCount * 4; i++) {
+            consumers.add(new Thread(new Fetcher(sharedQueue)));
+        }
+
+        // reset cancel flag
+        Crawler.cancelRequested = false;
+
+        // start all producers
+        producers.stream().forEach((t) -> {
+            t.start();
+        });
+
+        // start all consumers
+        consumers.stream().forEach((t) -> {
+            t.start();
+        });
     }
 
 }

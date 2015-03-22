@@ -1,12 +1,26 @@
 package zapoctak;
 
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Consumer's Job container.
+ *
+ * @author Vít Habada
+ */
 public class Job {
 
     /**
-     * Working URL.
+     * Number of blog pages per working thread.
+     */
+    public static final int PAGES_PER_JOB = 10;
+
+    /**
+     * End of blog flag.
+     */
+    public static boolean reachedEnd;
+
+    /**
+     * Working blog URL.
      */
     private static String URL;
 
@@ -16,20 +30,15 @@ public class Job {
     private List<String> images;
 
     /**
-     * Flag to indicate whether the job has been completed.
-     */
-    private boolean done;
-
-    /**
-     * @param page Job starting page
+     * @param l
      * @throws InvalidArgumentException
      */
-    public Job() throws InvalidArgumentException {
+    public Job(List<String> l) throws InvalidArgumentException {
         if (URL.length() == 0) {
             throw new InvalidArgumentException("Working URL is not set.");
         }
-        
-        images = new ArrayList<>();
+
+        images = l;
     }
 
     /**
@@ -46,6 +55,18 @@ public class Job {
     }
 
     /**
+     *
+     * @return @throws InvalidOperationException
+     */
+    public static String getUrl() throws InvalidOperationException {
+        if (URL.length() == 0) {
+            throw new InvalidOperationException("Working URL is not set.");
+        }
+
+        return URL;
+    }
+
+    /**
      * Adds a new image to the job.
      *
      * @param img Image URL
@@ -57,13 +78,8 @@ public class Job {
     /**
      *
      * @return Complete list of images
-     * @throws InvalidOperationException
      */
-    public List<String> getImages() throws InvalidOperationException {
-        if (!done) {
-            throw new InvalidOperationException("Job has not been processed yet.");
-        }
-
+    public List<String> getImages() {
         return images;
     }
 }
