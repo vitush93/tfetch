@@ -22,9 +22,14 @@ import java.util.regex.Pattern;
 public class Crawler extends AbstractWorker {
 
     /**
+     * Number of finished crawlers.
+     */
+    public static int deadCount = 0;
+
+    /**
      * Shared queue reference.
      */
-    protected final BlockingQueue<Job> queue;
+    private final BlockingQueue<Job> queue;
 
     /**
      * Job starting page.
@@ -50,11 +55,11 @@ public class Crawler extends AbstractWorker {
      * Stream reader.
      */
     private BufferedReader stream;
-    
+
     /**
-     * Invoke crawling stop.
+     * Crawling has finished.
      */
-    private boolean stop;
+    private boolean finished;
 
     /**
      *
@@ -79,7 +84,9 @@ public class Crawler extends AbstractWorker {
      * @throws InvalidOperationException
      */
     private void updateStream() throws IOException, MalformedURLException, InvalidOperationException {
-        URL website = new URL("http://" + Job.getUrl() + ".tumblr.com/page/" + currentPage);
+
+        //URL website = new URL("http://" + Job.getUrl() + ".tumblr.com/page/" + currentPage);
+        URL website = new URL(Job.getUrl() + "page/" + currentPage);
         URLConnection conn = website.openConnection();
         stream = new BufferedReader(new InputStreamReader(conn.getInputStream()));
     }
@@ -101,7 +108,7 @@ public class Crawler extends AbstractWorker {
         while ((s = stream.readLine()) != null) {
             sb.append(s);
         }
-        
+
         stream.close();
 
         return sb.toString();
@@ -126,7 +133,6 @@ public class Crawler extends AbstractWorker {
             String f = matcher.group(1);
             Matcher m = p.matcher(f);
             if (m.find()) {
-                // TODO: various sizes collectedLinks.add(f.replace("_500", "_1280"));
                 collectedLinks.add(f);
             }
         }
@@ -154,11 +160,11 @@ public class Crawler extends AbstractWorker {
     public int getStartPage() {
         return startPage;
     }
-    
+
     /**
      * Close any unfinished stream.
-     * 
-     * @throws IOException 
+     *
+     * @throws IOException
      */
     public void close() throws IOException {
         stream.close();
@@ -168,11 +174,13 @@ public class Crawler extends AbstractWorker {
     public void run() {
         try {
             for (;;) {
-                if (cancelRequested || stop) {
+                if (cancelRequested || finished) {
+                    deadCount++;
                     break;
                 }
                 crawl();
             }
+            System.out.println("Crawler " + Thread.currentThread().getId() + " has finished!");
         } catch (IOException | InvalidOperationException | InvalidArgumentException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException ex) {
@@ -181,10 +189,8 @@ public class Crawler extends AbstractWorker {
     }
 
     private void crawl() throws IOException, InterruptedException, InvalidArgumentException, InvalidOperationException {
-        System.out.println("queue size: " + queue.size());
-
         // wait if queue is full
-        while (queue.size() == TumblrFetchingService.QUEUE_SIZE) {
+        while (queue.size() == TumblrFetchingService.QUEUE_SIZE && !cancelRequested) {
             synchronized (queue) {
                 queue.wait();
             }
@@ -197,9 +203,9 @@ public class Crawler extends AbstractWorker {
 
             if (j++ == Job.PAGES_PER_JOB - 1) {
                 List<String> collected = flushCollected();
-                
+
                 if (collected.isEmpty()) {
-                    stop = true;
+                    finished = true;
                     break;
                 }
 
@@ -210,7 +216,7 @@ public class Crawler extends AbstractWorker {
                 }
                 j = 0;
             }
-            
+
             currentPage += increment;
             updateStream(); // load next page
             crawlCurrentPage(); // crawl

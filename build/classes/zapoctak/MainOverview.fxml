@@ -12,24 +12,23 @@
 <Pane id="AnchorPane" prefHeight="250.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="zapoctak.MainOverviewController">
     <children>
         <HBox alignment="TOP_LEFT" HBox.hgrow="ALWAYS">
-           <children>
-               <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="500.0">
-                   <menus>
-                       <Menu mnemonicParsing="false" text="File">
-                           <items>
-                               <MenuItem onAction="#menuClose" text="Close" />
-                           </items>
-                       </Menu>
-                   </menus>
-               </MenuBar>
-           </children>
+            <children>
+                <MenuBar fx:id="menuBar" prefHeight="25.0" prefWidth="500.0">
+                    <menus>
+                        <Menu mnemonicParsing="false" text="File">
+                            <items>
+                                <MenuItem onAction="#menuClose" text="Close" />
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+            </children>
         </HBox>
-        <TextField fx:id="textField" layoutX="60.0" layoutY="45.0" prefHeight="25.0" prefWidth="210.0" />
+        <TextField fx:id="textField" layoutX="75.0" layoutY="45.0" prefHeight="25.0" prefWidth="285.0" />
         <Button fx:id="fetchButton" layoutX="370.0" layoutY="45.0" mnemonicParsing="false" onAction="#initFetch" text="Fetch" />
         <Button fx:id="cancelButton" disable="true" layoutX="425.0" layoutY="45.0" mnemonicParsing="false" onAction="#cancelFetch" text="Cancel" /> 
-        <Label layoutX="16.0" layoutY="50.0" text="Blog:" />
+        <Label layoutX="16.0" layoutY="50.0" text="Blog URL:" />
         <Separator layoutY="230.0" prefWidth="500.0" />
         <Label fx:id="footerLabel" layoutX="8.0" layoutY="238.0" text="No job running" />
-      <ChoiceBox layoutX="279.0" layoutY="45.0" prefHeight="25.0" prefWidth="81.0" />
     </children>
 </Pane>

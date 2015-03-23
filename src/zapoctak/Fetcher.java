@@ -13,7 +13,7 @@ public class Fetcher extends AbstractWorker {
     /**
      * Shared queue reference.
      */
-    protected final BlockingQueue<Job> queue;
+    private final BlockingQueue<Job> queue;
 
     public Fetcher(BlockingQueue<Job> q) {
         queue = q;
@@ -22,13 +22,12 @@ public class Fetcher extends AbstractWorker {
     @Override
     public void run() {
         while (true) {
-            if (cancelRequested) {
+            if (cancelRequested || (queue.isEmpty() && Crawler.deadCount == TumblrFetchingService.CRAWLER_COUNT)) {
                 break;
             }
 
             try {
                 fetch();
-                Thread.sleep(50);
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -36,7 +35,7 @@ public class Fetcher extends AbstractWorker {
     }
 
     private void fetch() throws InterruptedException, IOException {
-        while (queue.isEmpty()) {
+        while (queue.isEmpty() && !cancelRequested) {
             synchronized (queue) {
                 queue.wait();
             }
@@ -46,9 +45,11 @@ public class Fetcher extends AbstractWorker {
             queue.notifyAll();
         }
 
-        System.out.println("processing job..");
         Job job = queue.poll();
-        if(job == null) return;
+        if (job == null) {
+            return;
+        }
+
         for (String url : job.getImages()) {
             if (cancelRequested) {
                 break;

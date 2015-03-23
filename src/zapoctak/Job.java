@@ -12,7 +12,7 @@ public class Job {
     /**
      * Number of blog pages per working thread.
      */
-    public static final int PAGES_PER_JOB = 10;
+    public static final int PAGES_PER_JOB = 5;
 
     /**
      * End of blog flag.
@@ -49,6 +49,10 @@ public class Job {
     public static void setUrl(String s) throws InvalidArgumentException {
         if (s.length() == 0) {
             throw new InvalidArgumentException("Working URL cannot be empty.");
+        }
+
+        if (!s.endsWith("/")) {
+            s = s + "/";
         }
 
         URL = s;

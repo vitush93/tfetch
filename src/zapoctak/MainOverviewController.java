@@ -1,9 +1,11 @@
 package zapoctak;
 
-
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -52,7 +54,6 @@ public class MainOverviewController implements Initializable {
         alert.setContentText(msg);
 
         alert.showAndWait();
-
     }
 
     /**
@@ -62,11 +63,23 @@ public class MainOverviewController implements Initializable {
      */
     @FXML
     public void cancelFetch(ActionEvent e) {
-        fetchingService.stop();
-
         cancelButton.setDisable(true);
-        fetchButton.setDisable(false);
-        textField.setDisable(false);
+        footerLabel.setText("Stopping job..");
+
+        Thread t = new Thread(() -> {
+            try {
+                fetchingService.stop();
+
+                cancelButton.setDisable(true);
+                fetchButton.setDisable(false);
+                textField.setDisable(false);
+                // TODO: throws exception footerLabel.setText("No job running");
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainOverviewController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        t.start();
+
     }
 
     /**
@@ -78,7 +91,11 @@ public class MainOverviewController implements Initializable {
     public void initFetch(ActionEvent e) {
         Stage s = (Stage) menuBar.getScene().getWindow();
         s.setOnHidden((WindowEvent e1) -> {
-            fetchingService.stop();
+            try {
+                fetchingService.stop();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainOverviewController.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
 
         if (textField.getText().length() == 0) {
@@ -88,7 +105,7 @@ public class MainOverviewController implements Initializable {
         }
 
         try {
-            URL test = new URL("http://" + textField.getText() + ".tumblr.com/");
+            URL test = new URL(textField.getText());
 
             HttpURLConnection conn = (HttpURLConnection) test.openConnection();
             conn.setRequestMethod("GET");
@@ -102,18 +119,18 @@ public class MainOverviewController implements Initializable {
             textField.setDisable(true);
             fetchButton.setDisable(true);
             cancelButton.setDisable(false);
+            footerLabel.setText("Job running..");
             startFetchingService();
         } catch (InvalidArgumentException ex) {
             MessageBox(s, ex.getMessage());
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             MessageBox(s, "Error occured while fetching the URL."); // bad luck huh
         }
     }
 
     private void startFetchingService() throws InvalidArgumentException {
         fetchingService = new TumblrFetchingService(textField.getText());
-        Thread t = new Thread(() -> fetchingService.start());
-        t.start();
+        fetchingService.start();
     }
 
     /**
