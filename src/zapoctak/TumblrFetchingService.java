@@ -1,4 +1,3 @@
-
 package zapoctak;
 
 import java.util.ArrayList;
@@ -90,7 +89,7 @@ public class TumblrFetchingService {
 
         // reset cancel flag
         Crawler.cancelRequested = false;
-        
+
         // reset deadCount
         Crawler.deadCount = 0;
 

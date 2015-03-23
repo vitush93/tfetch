@@ -180,7 +180,7 @@ public class Crawler extends AbstractWorker {
                 crawl();
             }
         } catch (IOException | InvalidOperationException | InvalidArgumentException e) {
-            throw new RuntimeException(e);
+            
         } catch (InterruptedException ex) {
             Logger.getLogger(Crawler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -195,6 +195,7 @@ public class Crawler extends AbstractWorker {
      * @throws InvalidOperationException 
      */
     private void crawl() throws IOException, InterruptedException, InvalidArgumentException, InvalidOperationException {
+        
         // wait if queue is full
         while (queue.size() == TumblrFetchingService.QUEUE_SIZE && !cancelRequested) {
             synchronized (queue) {

@@ -39,7 +39,7 @@ public class Fetcher extends AbstractWorker {
             try {
                 fetch();
             } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
+                
             }
         }
     }
