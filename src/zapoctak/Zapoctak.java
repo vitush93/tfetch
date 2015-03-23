@@ -1,3 +1,4 @@
+
 package zapoctak;
 
 
@@ -8,6 +9,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Main class containing program's entry point.
+ * 
+ * @author Vít
+ */
 public class Zapoctak extends Application {
     
     @Override

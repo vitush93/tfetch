@@ -1,5 +1,11 @@
+
 package zapoctak;
 
+/**
+ * Abstract Worker.
+ * 
+ * @author Vít Habada
+ */
 public abstract class AbstractWorker implements Runnable {
     
     /**

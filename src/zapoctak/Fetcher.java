@@ -1,3 +1,4 @@
+
 package zapoctak;
 
 import java.io.FileOutputStream;
@@ -8,6 +9,11 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Consumer worker class.
+ * 
+ * @author Vít
+ */
 public class Fetcher extends AbstractWorker {
 
     /**
@@ -15,6 +21,10 @@ public class Fetcher extends AbstractWorker {
      */
     private final BlockingQueue<Job> queue;
 
+    /**
+     * 
+     * @param q 
+     */
     public Fetcher(BlockingQueue<Job> q) {
         queue = q;
     }
@@ -34,6 +44,12 @@ public class Fetcher extends AbstractWorker {
         }
     }
 
+    /**
+     * Polls single Job from the Queue and process it.
+     * 
+     * @throws InterruptedException
+     * @throws IOException 
+     */
     private void fetch() throws InterruptedException, IOException {
         while (queue.isEmpty() && !cancelRequested) {
             synchronized (queue) {
@@ -58,6 +74,12 @@ public class Fetcher extends AbstractWorker {
         }
     }
 
+    /**
+     * Download an image from URL.
+     * 
+     * @param url
+     * @throws IOException 
+     */
     private void saveImage(String url) throws IOException {
         URL website = new URL(url);
 
@@ -66,17 +88,14 @@ public class Fetcher extends AbstractWorker {
         conn.connect();
 
         if (conn.getResponseCode() != 200) {
-            System.out.println("error : " + conn.getResponseCode() + " " + url);
             return;
         }
-
-        System.out.println("fetching " + url);
+        
         ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 
-        FileOutputStream fos = new FileOutputStream(url.substring(url.lastIndexOf('/') + 1, url.length()));
-        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-
-        fos.close();
+        try (FileOutputStream fos = new FileOutputStream(url.substring(url.lastIndexOf('/') + 1, url.length()))) {
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        }
     }
 
 }

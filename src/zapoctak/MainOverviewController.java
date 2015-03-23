@@ -1,3 +1,4 @@
+
 package zapoctak;
 
 import java.io.IOException;
@@ -18,6 +19,11 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+/**
+ * MainOverview controller.
+ * 
+ * @author Vít Habada
+ */
 public class MainOverviewController implements Initializable {
 
     private TumblrFetchingService fetchingService;
@@ -83,7 +89,7 @@ public class MainOverviewController implements Initializable {
     }
 
     /**
-     * Start the fetching process.
+     * Initialize the fetching process.
      *
      * @param e
      */
@@ -128,6 +134,11 @@ public class MainOverviewController implements Initializable {
         }
     }
 
+    /**
+     * Start the fetching process.
+     * 
+     * @throws InvalidArgumentException 
+     */
     private void startFetchingService() throws InvalidArgumentException {
         fetchingService = new TumblrFetchingService(textField.getText());
         fetchingService.start();

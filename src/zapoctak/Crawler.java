@@ -1,3 +1,4 @@
+
 package zapoctak;
 
 import java.io.BufferedReader;
@@ -84,8 +85,6 @@ public class Crawler extends AbstractWorker {
      * @throws InvalidOperationException
      */
     private void updateStream() throws IOException, MalformedURLException, InvalidOperationException {
-
-        //URL website = new URL("http://" + Job.getUrl() + ".tumblr.com/page/" + currentPage);
         URL website = new URL(Job.getUrl() + "page/" + currentPage);
         URLConnection conn = website.openConnection();
         stream = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -180,7 +179,6 @@ public class Crawler extends AbstractWorker {
                 }
                 crawl();
             }
-            System.out.println("Crawler " + Thread.currentThread().getId() + " has finished!");
         } catch (IOException | InvalidOperationException | InvalidArgumentException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException ex) {
@@ -188,6 +186,14 @@ public class Crawler extends AbstractWorker {
         }
     }
 
+    /**
+     * Crawls page by page and produces Job instances on the way.
+     * 
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws InvalidArgumentException
+     * @throws InvalidOperationException 
+     */
     private void crawl() throws IOException, InterruptedException, InvalidArgumentException, InvalidOperationException {
         // wait if queue is full
         while (queue.size() == TumblrFetchingService.QUEUE_SIZE && !cancelRequested) {
@@ -199,8 +205,6 @@ public class Crawler extends AbstractWorker {
         // otherwise continue crawling and generating jobs
         int j = 0;
         for (int i = startPage; i <= startPage + increment * Job.PAGES_PER_JOB; i = i + increment) {
-            System.out.println("current page: " + currentPage);
-
             if (j++ == Job.PAGES_PER_JOB - 1) {
                 List<String> collected = flushCollected();
 
