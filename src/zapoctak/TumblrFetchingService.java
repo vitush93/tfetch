@@ -89,6 +89,9 @@ public class TumblrFetchingService {
 
         // reset cancel flag
         Crawler.cancelRequested = false;
+        
+        // reset deadCount
+        Crawler.deadCount = 0;
 
         // start all producers
         producers.stream().forEach((t) -> {
