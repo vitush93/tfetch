@@ -32,7 +32,7 @@ public class Fetcher extends AbstractWorker {
     @Override
     public void run() {
         while (true) {
-            if (cancelRequested || (queue.isEmpty() && Crawler.deadCount == TumblrFetchingService.CRAWLER_COUNT)) {
+            if (cancelRequested || (queue.isEmpty() && Crawler.deadCount.get() == TumblrFetchingService.CRAWLER_COUNT)) {
                 break;
             }
 

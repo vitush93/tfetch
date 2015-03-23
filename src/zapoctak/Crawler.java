@@ -10,6 +10,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -25,7 +26,7 @@ public class Crawler extends AbstractWorker {
     /**
      * Number of finished crawlers.
      */
-    public static int deadCount = 0;
+    public static AtomicInteger deadCount = new AtomicInteger(0);
 
     /**
      * Shared queue reference.
@@ -174,7 +175,7 @@ public class Crawler extends AbstractWorker {
         try {
             for (;;) {
                 if (cancelRequested || finished) {
-                    deadCount++;
+                    deadCount.incrementAndGet();
                     break;
                 }
                 crawl();
