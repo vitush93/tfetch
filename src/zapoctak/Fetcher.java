@@ -18,20 +18,20 @@ public class Fetcher extends AbstractWorker {
     /**
      * Shared queue reference.
      */
-    private final BlockingQueue<Job> queue;
+    private final BlockingQueue<String> queue;
 
     /**
      *
      * @param q
      */
-    public Fetcher(BlockingQueue<Job> q) {
+    public Fetcher(BlockingQueue<String> q) {
         queue = q;
     }
 
     /**
      * General termination conditions.
-     * 
-     * @return 
+     *
+     * @return
      */
     private boolean finishedCondition() {
         return (queue.isEmpty() && Crawler.deadCount.get() == TumblrFetchingService.CRAWLER_COUNT);
@@ -51,6 +51,11 @@ public class Fetcher extends AbstractWorker {
 
             }
         }
+
+        // notify other fetchers that the job has finished
+        synchronized (queue) {
+            queue.notifyAll();
+        }
     }
 
     /**
@@ -60,28 +65,27 @@ public class Fetcher extends AbstractWorker {
      * @throws IOException
      */
     private void fetch() throws InterruptedException, IOException {
-        System.out.println("[Fet] queue: " + queue.size());
-        while (queue.isEmpty() && !cancelRequested) {
+        
+        // wait if Q is empty
+        while (queue.isEmpty() && Crawler.deadCount.get() != TumblrFetchingService.CRAWLER_COUNT && !cancelRequested) {
             synchronized (queue) {
                 queue.wait();
             }
         }
 
+        // process polled item
+        String url = queue.poll();
+        if (url == null) {
+            return;
+        }
+
+        // inform other threads about polling
         synchronized (queue) {
             queue.notify();
         }
 
-        Job job = queue.poll();
-        if (job == null) {
-            return;
-        }
-
-        for (String url : job.getImages()) {
-            if (cancelRequested) {
-                break;
-            }
-            saveImage(url);
-        }
+        // download image
+        saveImage(url);
     }
 
     /**

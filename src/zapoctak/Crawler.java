@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -30,7 +31,7 @@ public class Crawler extends AbstractWorker {
     /**
      * Shared queue reference.
      */
-    private final BlockingQueue<Job> queue;
+    private final BlockingQueue<String> queue;
 
     /**
      * Job starting page.
@@ -53,6 +54,11 @@ public class Crawler extends AbstractWorker {
     private volatile List<String> collectedLinks;
 
     /**
+     * Buffer for each thread.
+     */
+    private volatile Stack<String> stack;
+
+    /**
      * Stream reader.
      */
     private volatile BufferedReader stream;
@@ -68,12 +74,13 @@ public class Crawler extends AbstractWorker {
      * @param inc
      * @param start
      */
-    public Crawler(BlockingQueue<Job> q, int start, int inc) {
+    public Crawler(BlockingQueue<String> q, int start, int inc) {
         queue = q;
         increment = inc;
         startPage = start;
         currentPage = startPage;
         collectedLinks = new ArrayList<>();
+        stack = new Stack<>();
     }
 
     /**
@@ -85,7 +92,7 @@ public class Crawler extends AbstractWorker {
      * @throws InvalidOperationException
      */
     private void updateStream() throws IOException, MalformedURLException, InvalidOperationException {
-        URL website = new URL(Job.getUrl() + "page/" + currentPage);
+        URL website = new URL(TumblrFetchingService.URL + "page/" + currentPage);
         URLConnection conn = website.openConnection();
         stream = new BufferedReader(new InputStreamReader(conn.getInputStream()));
     }
@@ -188,6 +195,22 @@ public class Crawler extends AbstractWorker {
     }
 
     /**
+     * Tries to put an item to the shared queue. If the queue is full, crawler
+     * will store the value for later.
+     *
+     * @param s
+     */
+    private void tryPut(String s) {
+        if (!queue.offer(s)) {
+            stack.push(s);
+        } else {
+            synchronized (queue) {
+                queue.notify();
+            }
+        }
+    }
+
+    /**
      * Crawls page by page and produces Job instances on the way.
      *
      * @throws IOException
@@ -197,6 +220,15 @@ public class Crawler extends AbstractWorker {
      */
     private void crawl() throws IOException, InterruptedException, InvalidArgumentException, InvalidOperationException {
         
+        // deplete stack first
+        while (stack.size() > 0) {
+            if (cancelRequested) {
+                break;
+            }
+            tryPut(stack.pop());
+            Thread.sleep(100);
+        }
+
         // wait if queue is full
         while (queue.size() == TumblrFetchingService.QUEUE_SIZE && !cancelRequested) {
             synchronized (queue) {
@@ -204,29 +236,21 @@ public class Crawler extends AbstractWorker {
             }
         }
 
-        // otherwise continue crawling and generating jobs
-        int j = 0;
-        for (int i = startPage; i <= startPage + increment * Job.PAGES_PER_JOB; i = i + increment) {
-            System.out.println("[Crw-page" + currentPage + "] queue: " + queue.size());
-            if (j++ == Job.PAGES_PER_JOB - 1) {
-                List<String> collected = flushCollected();
+        // create stream and crawl page
+        updateStream();
+        crawlCurrentPage();
+        currentPage += increment;
 
-                if (collected.isEmpty()) {
-                    finished = true;
-                    break;
-                }
-
-                Job job = new Job(collected);
-                synchronized (queue) {
-                    queue.put(job);
-                    queue.notify();
-                }
-                j = 0;
-            }
-            
-            updateStream(); // load next page
-            crawlCurrentPage(); // crawl
-            currentPage += increment;
+        // thread reached end of the blog
+        List<String> collected = flushCollected();
+        if (collected.isEmpty() && stack.size() == 0) {
+            finished = true;
+            return;
         }
+
+        // put to Q or buffer it for later if the Q is full
+        collected.stream().forEach((s) -> {
+            tryPut(s);
+        });
     }
 }
