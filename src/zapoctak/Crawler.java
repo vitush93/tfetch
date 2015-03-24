@@ -138,7 +138,7 @@ public class Crawler extends AbstractWorker {
         while (matcher.find()) {
             String f = matcher.group(1);
             Matcher m = p.matcher(f);
-            if (m.find()) {
+            if (m.find() && TumblrFetchingService.addImageHash(f)) {
                 collectedLinks.add(f);
             }
         }

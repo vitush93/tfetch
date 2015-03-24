@@ -1,6 +1,7 @@
 package zapoctak;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -25,6 +26,11 @@ public class TumblrFetchingService {
      * Shared queue for the consumer-producer pattern.
      */
     private final BlockingQueue<String> sharedQueue;
+    
+    /**
+     * Set of downloaded images hash codes.
+     */
+    private static final HashSet<Integer> imageSet = new HashSet<>();
 
     /**
      * List of producers.
@@ -98,12 +104,16 @@ public class TumblrFetchingService {
 
             consumers.add(t);
         }
+        
+        // reset image hashset
+        imageSet.clear();
 
         // reset cancel flag
         Crawler.cancelRequested = false;
 
         // reset deadCount
         Crawler.deadCount.set(0);
+        Fetcher.deadCount.set(0);
 
         // start all producers
         producers.stream().forEach((t) -> {
@@ -114,6 +124,16 @@ public class TumblrFetchingService {
         consumers.stream().forEach((t) -> {
             t.start();
         });
+    }
+    
+    /**
+     * Adds the passed string's hashcode to the set.
+     * 
+     * @param s Image URL
+     * @return true if adding to the set was successful
+     */
+    public static synchronized boolean addImageHash(String s) {
+        return imageSet.add(s.hashCode());
     }
 
 }

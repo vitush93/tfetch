@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Consumer worker class.
@@ -15,6 +16,11 @@ import java.util.concurrent.BlockingQueue;
  */
 public class Fetcher extends AbstractWorker {
 
+    /**
+     * Number of finished fetchers.
+     */
+    public static AtomicInteger deadCount = new AtomicInteger(0);
+    
     /**
      * Shared queue reference.
      */
@@ -41,6 +47,7 @@ public class Fetcher extends AbstractWorker {
     public void run() {
         while (true) {
             if (cancelRequested || finishedCondition()) {
+                deadCount.incrementAndGet();
                 break;
             }
 

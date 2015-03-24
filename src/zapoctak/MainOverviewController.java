@@ -84,7 +84,6 @@ public class MainOverviewController implements Initializable {
             }
         });
         t.start();
-
     }
 
     /**
@@ -141,6 +140,31 @@ public class MainOverviewController implements Initializable {
     private void startFetchingService() throws InvalidArgumentException {
         fetchingService = new TumblrFetchingService(textField.getText());
         fetchingService.start();
+        
+        // natural stop - all worker threads finish
+        Runnable r = () -> {
+            while(Fetcher.deadCount.get() != TumblrFetchingService.FETCHER_COUNT && Crawler.deadCount.get() != TumblrFetchingService.CRAWLER_COUNT) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(TumblrFetchingService.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+            try {
+                fetchingService.stop();
+                
+                cancelButton.setDisable(true);
+                fetchButton.setDisable(false);
+                textField.setDisable(false);
+                textField.setText("");
+                // TODO: throws exception footerLabel.setText("No job running");
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainOverviewController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        };
+        
+        new Thread(r).start();
     }
 
     /**
