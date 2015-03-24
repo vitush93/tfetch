@@ -12,11 +12,11 @@ import java.util.concurrent.BlockingQueue;
  */
 public class TumblrFetchingService {
 
-    public static final int QUEUE_SIZE = 20;
+    public static final int QUEUE_SIZE = 10;
 
     // Worker counts must be a prime number
-    public static final int CRAWLER_COUNT = 5;
-    public static final int FETCHER_COUNT = 7;
+    public static final int CRAWLER_COUNT = 3;
+    public static final int FETCHER_COUNT = 17;
 
     /**
      * Shared queue for the consumer-producer pattern.
@@ -65,8 +65,9 @@ public class TumblrFetchingService {
 
     /**
      * Start the fetching process.
+     * @throws zapoctak.InvalidArgumentException
      */
-    public void start() {
+    public void start() throws InvalidArgumentException {
 
         // init producers - split by equivalence classes
         Thread f = new Thread(new Crawler(sharedQueue, CRAWLER_COUNT, CRAWLER_COUNT));
@@ -86,6 +87,9 @@ public class TumblrFetchingService {
 
             consumers.add(t);
         }
+        
+        // resed finish flag
+        Job.reachedEnd = false;
 
         // reset cancel flag
         Crawler.cancelRequested = false;

@@ -1,4 +1,3 @@
-
 package zapoctak;
 
 import java.io.FileOutputStream;
@@ -11,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 
 /**
  * Consumer worker class.
- * 
+ *
  * @author Vít
  */
 public class Fetcher extends AbstractWorker {
@@ -22,35 +21,46 @@ public class Fetcher extends AbstractWorker {
     private final BlockingQueue<Job> queue;
 
     /**
-     * 
-     * @param q 
+     *
+     * @param q
      */
     public Fetcher(BlockingQueue<Job> q) {
         queue = q;
     }
 
+    /**
+     * General termination conditions.
+     * 
+     * @return 
+     */
+    private boolean finishedCondition() {
+        return (queue.isEmpty() && Crawler.deadCount.get() == TumblrFetchingService.CRAWLER_COUNT);
+    }
+
     @Override
     public void run() {
         while (true) {
-            if (cancelRequested || (queue.isEmpty() && Crawler.deadCount.get() == TumblrFetchingService.CRAWLER_COUNT)) {
+            if (cancelRequested || finishedCondition()) {
                 break;
             }
 
             try {
                 fetch();
+                Thread.sleep(100);
             } catch (IOException | InterruptedException e) {
-                
+
             }
         }
     }
 
     /**
      * Polls single Job from the Queue and process it.
-     * 
+     *
      * @throws InterruptedException
-     * @throws IOException 
+     * @throws IOException
      */
     private void fetch() throws InterruptedException, IOException {
+        System.out.println("[Fet] queue: " + queue.size());
         while (queue.isEmpty() && !cancelRequested) {
             synchronized (queue) {
                 queue.wait();
@@ -58,7 +68,7 @@ public class Fetcher extends AbstractWorker {
         }
 
         synchronized (queue) {
-            queue.notifyAll();
+            queue.notify();
         }
 
         Job job = queue.poll();
@@ -76,9 +86,9 @@ public class Fetcher extends AbstractWorker {
 
     /**
      * Download an image from URL.
-     * 
+     *
      * @param url
-     * @throws IOException 
+     * @throws IOException
      */
     private void saveImage(String url) throws IOException {
         URL website = new URL(url);
@@ -90,7 +100,7 @@ public class Fetcher extends AbstractWorker {
         if (conn.getResponseCode() != 200) {
             return;
         }
-        
+
         ReadableByteChannel rbc = Channels.newChannel(website.openStream());
 
         try (FileOutputStream fos = new FileOutputStream(url.substring(url.lastIndexOf('/') + 1, url.length()))) {

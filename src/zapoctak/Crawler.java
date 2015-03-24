@@ -1,4 +1,3 @@
-
 package zapoctak;
 
 import java.io.BufferedReader;
@@ -46,22 +45,22 @@ public class Crawler extends AbstractWorker {
     /**
      * Current page being crawled.
      */
-    private int currentPage;
+    private volatile int currentPage;
 
     /**
      * List of collected image URLs.
      */
-    private final List<String> collectedLinks;
+    private volatile List<String> collectedLinks;
 
     /**
      * Stream reader.
      */
-    private BufferedReader stream;
+    private volatile BufferedReader stream;
 
     /**
      * Crawling has finished.
      */
-    private boolean finished;
+    private volatile boolean finished;
 
     /**
      *
@@ -173,15 +172,16 @@ public class Crawler extends AbstractWorker {
     @Override
     public void run() {
         try {
-            for (;;) {
+            while (true) {
                 if (cancelRequested || finished) {
                     deadCount.incrementAndGet();
                     break;
                 }
                 crawl();
+                Thread.sleep(100);
             }
         } catch (IOException | InvalidOperationException | InvalidArgumentException e) {
-            
+
         } catch (InterruptedException ex) {
             Logger.getLogger(Crawler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -189,11 +189,11 @@ public class Crawler extends AbstractWorker {
 
     /**
      * Crawls page by page and produces Job instances on the way.
-     * 
+     *
      * @throws IOException
      * @throws InterruptedException
      * @throws InvalidArgumentException
-     * @throws InvalidOperationException 
+     * @throws InvalidOperationException
      */
     private void crawl() throws IOException, InterruptedException, InvalidArgumentException, InvalidOperationException {
         
@@ -207,6 +207,7 @@ public class Crawler extends AbstractWorker {
         // otherwise continue crawling and generating jobs
         int j = 0;
         for (int i = startPage; i <= startPage + increment * Job.PAGES_PER_JOB; i = i + increment) {
+            System.out.println("[Crw-page" + currentPage + "] queue: " + queue.size());
             if (j++ == Job.PAGES_PER_JOB - 1) {
                 List<String> collected = flushCollected();
 
@@ -222,10 +223,10 @@ public class Crawler extends AbstractWorker {
                 }
                 j = 0;
             }
-
-            currentPage += increment;
+            
             updateStream(); // load next page
             crawlCurrentPage(); // crawl
+            currentPage += increment;
         }
     }
 }
