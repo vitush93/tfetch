@@ -181,7 +181,6 @@ public class Crawler extends AbstractWorker {
         try {
             while (true) {
                 if (cancelRequested || finished) {
-                    deadCount.incrementAndGet();
                     break;
                 }
                 crawl();
@@ -192,6 +191,8 @@ public class Crawler extends AbstractWorker {
         } catch (InterruptedException ex) {
             Logger.getLogger(Crawler.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        deadCount.incrementAndGet();
     }
 
     /**
