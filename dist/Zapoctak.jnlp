@@ -2,18 +2,15 @@
 <jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="Zapoctak.jnlp">
   <information>
     <title>Zapoctak</title>
-    <vendor>Vít Habada</vendor>
+    <vendor>VÃ­t Habada</vendor>
     <description>simple tumblr downloader</description>
     <icon href="tblogo.png"  kind="splash"/>
     <icon href="tblogo.ico" />
     <offline-allowed/>
   </information>
   <resources>
-    <jfx:javafx-runtime version="8.0+" href="http://javadl.sun.com/webapps/download/GetFile/javafx-latest/windows-i586/javafx2.jnlp"/>
-  </resources>
-  <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="Zapoctak.jar" size="14323" download="eager" />
+    <jar href="Zapoctak.jar" size="14478" download="eager" />
   </resources>
   <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="Zapoctak" >
     <param name="requiredFXVersion" value="8.0+"/>

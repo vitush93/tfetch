@@ -231,7 +231,8 @@ public class Crawler extends AbstractWorker {
         }
 
         // wait if queue is full
-        while (queue.size() == TumblrFetchingService.QUEUE_SIZE && !cancelRequested) {
+        boolean queueFull = queue.size() == TumblrFetchingService.QUEUE_SIZE;
+        while (queueFull && !cancelRequested) {
             synchronized (queue) {
                 queue.wait();
             }

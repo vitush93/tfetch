@@ -74,7 +74,8 @@ public class Fetcher extends AbstractWorker {
     private void fetch() throws InterruptedException, IOException {
         
         // wait if Q is empty
-        while (queue.isEmpty() && Crawler.deadCount.get() != TumblrFetchingService.CRAWLER_COUNT && !cancelRequested) {
+        boolean crawlersStillAlive = Crawler.deadCount.get() != TumblrFetchingService.CRAWLER_COUNT; 
+        while (queue.isEmpty() && crawlersStillAlive && !cancelRequested) {
             synchronized (queue) {
                 queue.wait();
             }

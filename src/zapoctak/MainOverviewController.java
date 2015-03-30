@@ -143,7 +143,9 @@ public class MainOverviewController implements Initializable {
         
         // natural stop - all worker threads finish
         Runnable r = () -> {
-            while(Fetcher.deadCount.get() != TumblrFetchingService.FETCHER_COUNT && Crawler.deadCount.get() != TumblrFetchingService.CRAWLER_COUNT) {
+            boolean fetchersStillAlive = Fetcher.deadCount.get() != TumblrFetchingService.FETCHER_COUNT;
+            boolean crawlersStillAlive = Crawler.deadCount.get() != TumblrFetchingService.CRAWLER_COUNT;
+            while(fetchersStillAlive && crawlersStillAlive) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ex) {
